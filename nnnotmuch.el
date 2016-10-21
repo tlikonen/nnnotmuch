@@ -112,7 +112,6 @@
     (if (not terms)
         (nnnotmuch--error "Invalid group data (nnnotmuch-groups")
       (let ((message-ids (nnnotmuch--get-message-ids terms))
-            (header nil)
             (number 1))
         (if (not message-ids)
             (nnnotmuch--error "No messages")
