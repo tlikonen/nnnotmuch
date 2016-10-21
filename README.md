@@ -48,7 +48,7 @@ example:
     (setq nnnotmuch-program "notmuch") ; This is the default.
 
 Server names and group names can be any strings. This back-end relies
-entirely on notmuch to access files provide content. The example
+entirely on Notmuch to access files and provide content. The example
 configuration will introduce the following groups:
 
     nnnotmuch+server:some.group.name
