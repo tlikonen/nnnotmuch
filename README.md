@@ -39,7 +39,7 @@ example:
 
     (setq nnnotmuch-groups
           '(("server"
-             ("some.group.name" "search" "terms" "here"))
+             ("some.group.name" "search" "terms" "here")
              ("other.group.name" "other" "search" "terms"))
             ("" ; A nameless server.
              ("work.recent" "date:7days.." "(" "to:me@work" "or" "from:me@work" ")")
