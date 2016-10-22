@@ -157,7 +157,7 @@
       (setq nnnotmuch-current-server server)
     (setq server nnnotmuch-current-server))
 
-  
+
   (when (numberp article)
     (let ((terms (nnnotmuch--get-terms server group)))
       (if (not terms)
