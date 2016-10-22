@@ -2,7 +2,7 @@
 
 ;; Author: Teemu Likonen <tlikonen@iki.fi>
 ;; Created: 2016-10-21
-;; URL: https://github.com/tlikonen/gnus-bogofilter
+;; URL: https://github.com/tlikonen/nnnotmuch
 ;; Keywords: Gnus Notmuch back-end server
 
 ;; Copyright (C) 2016 Teemu Likonen <tlikonen@iki.fi>
