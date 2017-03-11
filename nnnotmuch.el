@@ -39,13 +39,14 @@
   (apply #'nnheader-report 'nnnotmuch format-args)
   nil)
 
+(defun nnnotmuch--get-group-data (server)
+  (cdr (cl-assoc server nnnotmuch-groups :test #'equal)))
+
 (defun nnnotmuch--get-groups (server)
-  (mapcar #'car (cdr (cl-assoc server nnnotmuch-groups
-                               :test #'equal))))
+  (mapcar #'car (nnnotmuch--get-group-data server)))
 
 (defun nnnotmuch--get-terms (server group)
-  (cdr (cl-assoc group (cdr (cl-assoc server nnnotmuch-groups
-                                      :test #'equal))
+  (cdr (cl-assoc group (nnnotmuch--get-group-data server)
                  :test #'equal)))
 
 (defun nnnotmuch--call-notmuch (&rest args)
