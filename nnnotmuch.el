@@ -36,6 +36,11 @@
   (apply #'nnheader-report 'nnnotmuch format-args)
   nil)
 
+(defmacro nnnotmuch--ensure-current-server (server)
+  `(if ,server
+       (setq nnnotmuch-current-server ,server)
+     (setq ,server nnnotmuch-current-server)))
+
 (defun nnnotmuch--get-group-data (server)
   (cdr (cl-assoc server nnnotmuch-groups :test #'equal)))
 
@@ -104,9 +109,7 @@
 
 (defun nnnotmuch-retrieve-headers (articles &optional group server fetch-old)
   (setq group (or group nnnotmuch-current-group))
-  (if server
-      (setq nnnotmuch-current-server server)
-    (setq server nnnotmuch-current-server))
+  (nnnotmuch--ensure-current-server server)
 
   (let ((terms (nnnotmuch--get-terms server group)))
     (if (not terms)
@@ -131,9 +134,7 @@
       t)))
 
 (defun nnnotmuch-close-server (&optional server)
-  (if server
-      (setq nnnotmuch-current-server server)
-    (setq server nnnotmuch-current-server))
+  (nnnotmuch--ensure-current-server server)
   t)
 
 (defun nnnotmuch-request-close ()
@@ -142,20 +143,15 @@
   t)
 
 (defun nnnotmuch-server-opened (&optional server)
-  (if server
-      (setq nnnotmuch-current-server server)
-    (setq server nnnotmuch-current-server))
-  (nnnotmuch--get-groups server))
+  (nnnotmuch--ensure-current-server server)
+  (nnnotmuch--get-group-data server))
 
 (defun nnnotmuch-status-message (&optional server)
   nnnotmuch--last-error)
 
 (defun nnnotmuch-request-article (article &optional group server to-buffer)
   (setq group (or group nnnotmuch-current-group))
-  (if server
-      (setq nnnotmuch-current-server server)
-    (setq server nnnotmuch-current-server))
-
+  (nnnotmuch--ensure-current-server server)
 
   (when (numberp article)
     (let ((terms (nnnotmuch--get-terms server group)))
@@ -177,9 +173,7 @@
           t)))))
 
 (defun nnnotmuch-request-group (group &optional server fast info)
-  (if server
-      (setq nnnotmuch-current-server server)
-    (setq server nnnotmuch-current-server))
+  (nnnotmuch--ensure-current-server server)
   (setq nnnotmuch-current-group group)
   (if fast
       t
@@ -195,9 +189,7 @@
 (defun nnnotmuch-close-group (group &optional server) t)
 
 (defun nnnotmuch-request-list (&optional server)
-  (if server
-      (setq nnnotmuch-current-server server)
-    (setq server nnnotmuch-current-server))
+  (nnnotmuch--ensure-current-server server)
   (let ((groups (nnnotmuch--get-groups server)))
     (if (not groups)
         (nnnotmuch--error "Couldn't retrieve groups for server %s" server)
