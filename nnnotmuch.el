@@ -23,19 +23,16 @@
 
 (require 'cl-lib)
 (require 'nnheader)
-(require 'nnoo)
-(require 'nnml)
-
-(nnoo-declare nnnotmuch nnml)
-(nnoo-define-basics nnnotmuch)
 
 (defvar nnnotmuch-program "notmuch")
 (defvar nnnotmuch--buffer-name " *notmuch*")
 (defvar nnnotmuch-current-server nil)
 (defvar nnnotmuch-current-group nil)
 (defvar nnnotmuch-groups nil)
+(defvar nnnotmuch--last-error nil)
 
 (defun nnnotmuch--error (&rest format-args)
+  (setq nnnotmuch--last-error (apply #'format format-args))
   (apply #'nnheader-report 'nnnotmuch format-args)
   nil)
 
@@ -107,7 +104,7 @@
         (string-to-number
          (buffer-substring-no-properties (point) (line-end-position)))))))
 
-(deffoo nnnotmuch-retrieve-headers (articles &optional group server fetch-old)
+(defun nnnotmuch-retrieve-headers (articles &optional group server fetch-old)
   (setq group (or group nnnotmuch-current-group))
   (if server
       (setq nnnotmuch-current-server server)
@@ -128,35 +125,34 @@
               (setq number (1+ number)))
             'nov))))))
 
-(deffoo nnnotmuch-open-server (server &optional definitions)
+(defun nnnotmuch-open-server (server &optional definitions)
   (setq nnnotmuch-current-server server)
-  (nnoo-change-server 'nnnotmuch server definitions)
   (let ((groups (cdr (cl-assoc server nnnotmuch-groups :test #'equal))))
     (if (not groups)
         (nnnotmuch--error "No group definitions for this server")
       t)))
 
-(deffoo nnnotmuch-close-server (&optional server)
+(defun nnnotmuch-close-server (&optional server)
   (if server
       (setq nnnotmuch-current-server server)
     (setq server nnnotmuch-current-server))
-  (nnoo-close-server 'nnnotmuch))
+  t)
 
-(deffoo nnnotmuch-request-close ()
+(defun nnnotmuch-request-close ()
   (setq nnnotmuch-current-server nil)
   (setq nnnotmuch-current-group nil)
   t)
 
-(deffoo nnnotmuch-server-opened (&optional server)
+(defun nnnotmuch-server-opened (&optional server)
   (if server
       (setq nnnotmuch-current-server server)
     (setq server nnnotmuch-current-server))
   (nnnotmuch--get-groups server))
 
-;; (deffoo nnnotmuch-status-message (&optional server)
-;;   nnnotmuch--last-error)
+(defun nnnotmuch-status-message (&optional server)
+  nnnotmuch--last-error)
 
-(deffoo nnnotmuch-request-article (article &optional group server to-buffer)
+(defun nnnotmuch-request-article (article &optional group server to-buffer)
   (setq group (or group nnnotmuch-current-group))
   (if server
       (setq nnnotmuch-current-server server)
@@ -182,7 +178,7 @@
             (nnnotmuch--error "Error retrieving article %s" article)
           t)))))
 
-(deffoo nnnotmuch-request-group (group &optional server fast info)
+(defun nnnotmuch-request-group (group &optional server fast info)
   (if server
       (setq nnnotmuch-current-server server)
     (setq server nnnotmuch-current-server))
@@ -198,9 +194,9 @@
           (insert (format "211 %s 1 %s %s\n" count count group))
           t)))))
 
-(deffoo nnnotmuch-close-group (group &optional server) t)
+(defun nnnotmuch-close-group (group &optional server) t)
 
-(deffoo nnnotmuch-request-list (&optional server)
+(defun nnnotmuch-request-list (&optional server)
   (if server
       (setq nnnotmuch-current-server server)
     (setq server nnnotmuch-current-server))
@@ -215,10 +211,6 @@
                                (nnnotmuch--get-terms server group))
                               0))))
         t))))
-
-;; (deffoo nnnotmuch-request-post (&optional server) t)
-(nnoo-map-functions nnnotmuch
-  (nnml-request-post 0))
 
 (gnus-declare-backend "nnnotmuch" 'post-mail 'address)
 
