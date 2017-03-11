@@ -41,14 +41,14 @@
        (setq nnnotmuch-current-server ,server)
      (setq ,server nnnotmuch-current-server)))
 
-(defun nnnotmuch--get-group-data (server)
+(defun nnnotmuch--get-server-data (server)
   (cdr (cl-assoc server nnnotmuch-groups :test #'equal)))
 
 (defun nnnotmuch--get-groups (server)
-  (mapcar #'car (nnnotmuch--get-group-data server)))
+  (mapcar #'car (nnnotmuch--get-server-data server)))
 
 (defun nnnotmuch--get-terms (server group)
-  (cdr (cl-assoc group (nnnotmuch--get-group-data server)
+  (cdr (cl-assoc group (nnnotmuch--get-server-data server)
                  :test #'equal)))
 
 (defun nnnotmuch--call-notmuch (server &rest args)
@@ -144,7 +144,7 @@
 
 (defun nnnotmuch-server-opened (&optional server)
   (nnnotmuch--ensure-current-server server)
-  (nnnotmuch--get-group-data server))
+  (nnnotmuch--get-server-data server))
 
 (defun nnnotmuch-status-message (&optional server)
   nnnotmuch--last-error)
