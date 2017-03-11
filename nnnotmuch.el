@@ -5,7 +5,7 @@
 ;; URL: https://github.com/tlikonen/nnnotmuch
 ;; Keywords: Gnus Notmuch back-end server
 
-;; Copyright (C) 2016 Teemu Likonen <tlikonen@iki.fi>
+;; Copyright (C) 2016-2017 Teemu Likonen <tlikonen@iki.fi>
 ;;
 ;; This program is free software: you can redistribute it and/or modify it
 ;; under the terms of the GNU General Public License as published by the
@@ -49,6 +49,10 @@
                  :test #'equal)))
 
 (defun nnnotmuch--call-notmuch (&rest args)
+  (when (and (stringp nnnotmuch-current-server)
+             (> (length nnnotmuch-current-server) 0))
+    (push (concat "--config=" (expand-file-name nnnotmuch-current-server))
+          args))
   (apply #'call-process nnnotmuch-program nil t nil args))
 
 (defun nnnotmuch--get-message-ids (terms)

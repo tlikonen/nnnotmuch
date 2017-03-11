@@ -27,40 +27,47 @@ buffer) resulting from the configured Notmuch search.
 [Emacs]: https://www.gnu.org/software/emacs/
 
 
-Installation
-------------
+Installation and Usage
+----------------------
 
-Evaluate the code at Gnus startup (e.g., `(require 'nnnotmuch)`). Add
-*nnnotmuch* server and group configuration in Gnus's startup file. For
-example:
+Evaluate the `nnnotmuch.el` code at Gnus startup (e.g., `(require
+'nnnotmuch)`). Add *nnnotmuch* server and group configuration in Gnus's
+startup file.
 
-    (push '(nnnotmuch "server") gnus-secondary-select-methods)
+The nnnotmuch server name is the filename of Notmuch configuration file.
+The server name is passed to Notmuch executable program with `--config=`
+option. If the server name is the empty string `""` (nameless server)
+then the default Notmuch configuration file is used.
+
+For example:
+
     (push '(nnnotmuch "") gnus-secondary-select-methods)
+    (push '(nnnotmuch "~/.other-notmuch-config") gnus-secondary-select-methods)
 
     (setq nnnotmuch-groups
-          '(("server"
-             ("some.group.name" "search" "terms" "here")
-             ("other.group.name" "other" "search" "terms"))
-            ("" ; A nameless server.
+          '((""   ; Nameless server (the default Notmuch config)
              ("work.recent" "date:7days.." "(" "to:me@work" "or" "from:me@work" ")")
-             ("work.boss" "date:1months.." "from:boss@work"))))
+             ("work.boss" "date:1months.." "from:boss@work"))
+            ("~/.other-notmuch-config"
+             ("some.group.name" "search" "terms" "here")
+             ("other.group.name" "other" "search" "terms"))))
 
     (setq nnnotmuch-program "notmuch") ; This is the default.
 
-Server names and group names can be any strings. This back-end relies
-entirely on Notmuch to access files and provide content. The example
+Group names can be any strings. This back-end relies entirely on Notmuch
+to access mail files and provide content for Gnus. The above example
 configuration will introduce the following groups:
 
-    nnnotmuch+server:some.group.name
-    nnnotmuch+server:other.group.name
     nnnotmuch:work.recent
     nnnotmuch:work.boss
+    nnnotmuch+~/.other-notmuch-config:some.group.name
+    nnnotmuch+~/.other-notmuch-config:other.group.name
 
 
 Copyright and License
 ---------------------
 
-Copyright (C) 2016 Teemu Likonen <<tlikonen@iki.fi>>
+Copyright (C) 2016-2017 Teemu Likonen <<tlikonen@iki.fi>>
 
 PGP: [4E10 55DC 84E9 DFF6 13D7 8557 719D 69D3 2453 9450][PGP]
 
