@@ -46,16 +46,14 @@
   (cdr (cl-assoc group (nnnotmuch--get-group-data server)
                  :test #'equal)))
 
-(defun nnnotmuch--call-notmuch (&rest args)
-  (when (and (stringp nnnotmuch-current-server)
-             (> (length nnnotmuch-current-server) 0))
-    (push (concat "--config=" (expand-file-name nnnotmuch-current-server))
-          args))
+(defun nnnotmuch--call-notmuch (server &rest args)
+  (when (> (length server) 0)
+    (push (concat "--config=" (expand-file-name server)) args))
   (apply #'call-process nnnotmuch-program nil t nil args))
 
-(defun nnnotmuch--get-message-ids (terms)
+(defun nnnotmuch--get-message-ids (server terms)
   (with-temp-buffer
-    (let ((status (apply #'nnnotmuch--call-notmuch
+    (let ((status (apply #'nnnotmuch--call-notmuch server
                          "search" "--format=sexp" "--output=messages"
                          "--sort=oldest-first" "--" terms)))
       (if (not (eql 0 status))
@@ -63,10 +61,10 @@
         (goto-char (point-min))
         (read (current-buffer))))))
 
-(defun nnnotmuch--get-header (message-id)
+(defun nnnotmuch--get-header (server message-id)
   (with-current-buffer (get-buffer-create nnnotmuch--buffer-name)
     (erase-buffer)
-    (let ((status (nnnotmuch--call-notmuch
+    (let ((status (nnnotmuch--call-notmuch server
                    "show" "--entire-thread=false" "--format=mbox" "--"
                    (format "id:%s" message-id))))
       (if (not (eql 0 status))
@@ -94,10 +92,10 @@
                         (setq out (format "%s\t%s: %s"
                                           out (car e) (cdr e)))))))))
 
-(defun nnnotmuch--message-count (terms)
+(defun nnnotmuch--message-count (server terms)
   (with-temp-buffer
-    (let ((status (apply #'nnnotmuch--call-notmuch "count" "--output=messages"
-                         "--" terms)))
+    (let ((status (apply #'nnnotmuch--call-notmuch server
+                         "count" "--output=messages" "--" terms)))
       (if (not (eql 0 status))
           (nnnotmuch--error "Couldn't retrieve message count")
         (goto-char (point-min))
@@ -113,7 +111,7 @@
   (let ((terms (nnnotmuch--get-terms server group)))
     (if (not terms)
         (nnnotmuch--error "Invalid group data (nnnotmuch-groups")
-      (let ((message-ids (nnnotmuch--get-message-ids terms))
+      (let ((message-ids (nnnotmuch--get-message-ids server terms))
             (number 1))
         (if (not message-ids)
             (nnnotmuch--error "No messages")
@@ -121,7 +119,7 @@
             (erase-buffer)
             (dolist (id message-ids)
               (nnnotmuch--insert-nov-line
-               number (nnnotmuch--get-header id))
+               number (nnnotmuch--get-header server id))
               (setq number (1+ number)))
             'nov))))))
 
@@ -164,13 +162,13 @@
       (if (not terms)
           (nnnotmuch--error "Invalid group data (nnnotmuch-groups")
         (setq article (nth (1- article)
-                           (nnnotmuch--get-message-ids terms))))))
+                           (nnnotmuch--get-message-ids server terms))))))
 
   (if (not (stringp article))
       (nnnotmuch--error "Invalid article %s" article)
     (with-current-buffer (or to-buffer nntp-server-buffer)
       (erase-buffer)
-      (let ((status (nnnotmuch--call-notmuch
+      (let ((status (nnnotmuch--call-notmuch server
                      "show" "--entire-thread=false" "--format=mbox"
                      "--part=0" "--body=true" "--"
                      (format "id:%s" article))))
@@ -186,7 +184,7 @@
   (if fast
       t
     (let ((count (nnnotmuch--message-count
-                  (nnnotmuch--get-terms server group))))
+                  server (nnnotmuch--get-terms server group))))
       (with-current-buffer nntp-server-buffer
         (erase-buffer)
         (if (not (integerp count))
@@ -208,7 +206,7 @@
         (dolist (group groups)
           (insert (format "%s %s 1 n\n" group
                           (or (nnnotmuch--message-count
-                               (nnnotmuch--get-terms server group))
+                               server (nnnotmuch--get-terms server group))
                               0))))
         t))))
 
