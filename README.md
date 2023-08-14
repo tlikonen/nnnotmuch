@@ -4,6 +4,9 @@ NNNotmuch
 **[Notmuch][] search engine back-end for [Gnus][] ([Emacs's][Emacs] mail
 and news client)**
 
+*Note:* This program is not maintained. You are free to adopt it,
+maintain and develop it further.
+
 
 Info
 ----
